@@ -1,0 +1,9 @@
+global:
+  vm_cpus: 2
+  vm_ram: 2048
+  vm_user: administrator
+  vm_password: ChangeMe!123
+  hostonly_net_id: "16c44191-4ed6-4ebe-9130-9f65087e6bf0"
+  hostonly_net_name: k8s-private
+  hostonly_net_mask: "255.255.255.0"
+  hostonly_net_ip_prefix: "10.50.0."

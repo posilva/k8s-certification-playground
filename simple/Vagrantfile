@@ -1,0 +1,38 @@
+# -*- mode: ruby -*-
+# vi: set ft=ruby :
+
+require 'yaml'
+require_relative "../vagrant/helpers"
+require_relative "../vagrant/config"
+
+cc = Cluster::Config.from_yaml_file('config.yaml')
+
+Vagrant.configure("2") do |config|
+  config.vm.box = "bento/ubuntu-24.04"
+  config.vm.box_version = "202510.26.0"
+  #config.vm.disk :disk, size: x.fetch('global').fetch('disk_size', "20GB"), primary: true
+  config.vm.synced_folder ".", "/vagrant", type: "virtualbox" 
+
+  config.trigger.before :up do |t|
+    t.name = "Ensure VirtualBox host-only network exists and is configured"
+    t.run = {
+      inline: <<-SHELL
+      VBoxManage hostonlynet add --name=#{cc.hostonly_net_name} --id=#{cc.hostonly_net_id} --netmask=#{cc.hostonly_net_mask} --lower-ip=#{cc.hostonly_net_ip_prefix}1 --upper-ip=#{cc.hostonly_net_ip_prefix}100 --enable
+      SHELL
+    }
+  end
+
+  config.trigger.after :destroy do |t|
+    t.name = "Ensure VirtualBox host-only network is destroyed"
+    t.run = {
+      inline: "bash -c '
+      echo \"deleting network #{cc.hostonly_net_id} \" &&
+      VBoxManage hostonlynet remove --id=#{cc.hostonly_net_id} && 
+      echo \"destroyed\" || echo \"failed to delete\"
+      '"
+    }
+end
+
+  VagrantHelpers.install_control_plane("cp01", 10, config, cc)
+  VagrantHelpers.install_worker_node("w01", 40, config, cc)
+end
