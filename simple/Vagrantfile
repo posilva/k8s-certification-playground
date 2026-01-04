@@ -31,8 +31,26 @@ Vagrant.configure("2") do |config|
       echo \"destroyed\" || echo \"failed to delete\"
       '"
     }
-end
+  end
 
-  VagrantHelpers.install_control_plane("cp01", 10, config, cc)
-  VagrantHelpers.install_worker_node("w01", 40, config, cc)
+  script_builder = lambda do |host_ip, cc|
+  [
+    { path: "../scripts/00-common.sh", args: [host_ip, cc.vm_user, cc.vm_password] },
+    { path: "scripts/10-control-plane.sh", args: [host_ip]},
+    { path: "../scripts/99-common-post.sh"}
+   ]
+  end 
+  node = VagrantHelpers.install_node("cp", 10, config, cc, script_builder)
+  puts "Control Plane Node: #{node}" 
+
+  script_builder = lambda do |host_ip, cc|
+    [
+    { path: "../scripts/00-common.sh", args: [host_ip, cc.vm_user, cc.vm_password] },
+    { path: "scripts/20-worker.sh"},
+    { path: "../scripts/99-common-post.sh"},
+      { path: "../scripts/50-network-gw.sh", args: node[:path] }
+   ]
+  end
+  node =  VagrantHelpers.install_node("w", 40, config, cc, script_builder)
+  puts "Worker Node: #{node}"
 end

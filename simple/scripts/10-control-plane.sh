@@ -14,8 +14,6 @@ POD_CIDR="${POD_CIDR:-192.168.0.0/16}"
 SVC_CIDR="${SVC_CIDR:-10.96.0.0/12}"
 K8S_VERSION="${K8S_VERSION:-}"
 
-CALICO_VERSION="${CALICO_VERSION:-3.31.2}"
-
 ARTIFACT_DIR="/vagrant/artifacts"
 KUBECONFIG_OUT="${ARTIFACT_DIR}/kubeconfig"
 JOIN_OUT="${ARTIFACT_DIR}/join.sh"
@@ -58,6 +56,8 @@ else
 fi
 
 export KUBECONFIG=/etc/kubernetes/admin.conf
+CALICO_VERSION="${CALICO_VERSION:-3.31.2}"
+
 echo "[10-controlplane] Installing Calico (Tigera Operator) v${CALICO_VERSION}..."
 kubectl create -f "https://raw.githubusercontent.com/projectcalico/calico/v${CALICO_VERSION}/manifests/operator-crds.yaml"
 kubectl create -f "https://raw.githubusercontent.com/projectcalico/calico/v${CALICO_VERSION}/manifests/tigera-operator.yaml"
@@ -99,7 +99,11 @@ chmod 0644 "${KUBECONFIG_OUT}" "${JOIN_OUT}"
 echo "[10-controlplane] Installing metrics server"
 kubectl apply -f /vagrant/manifests/metrics-server-deployment.yaml
 
+echo "[10 - controlplane] Installing API gateway NGINX Gateway Fabric"
+
 echo "[10-controlplane] Done."
 echo "[10-controlplane] Artifacts:"
 echo "  - ${JOIN_OUT}"
 echo "  - ${KUBECONFIG_OUT}"
+echo "[10-control plane] - list available namespaces "
+kubectl get namespaces

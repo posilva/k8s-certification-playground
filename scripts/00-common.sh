@@ -95,7 +95,7 @@ apt-get update -y
 
 echo "[00-common] Installing containerd..."
 
-apt-get install -y --no-install-recommends containerd.io
+apt-get install -y --no-install-recommends containerd.io=2.2.0-2~${ID}.${VERSION_ID}~${VERSION_CODENAME}
 
 mkdir -p /etc/containerd
 containerd config default >/etc/containerd/config.toml

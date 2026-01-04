@@ -1,0 +1,29 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: network-lab 
+--- 
+apiVersion: v1
+kind: Pod 
+metadata:
+  name: nwp-nginx 
+spec: 
+  containers:
+  - name: nginx 
+    image: nginx
+    ports:
+    - containerPort: 80
+--- 
+apiVersion: v1
+kind: Pod
+metadata:
+  name: nwp-busybox
+  namespace: network-lab
+spec:
+  containers:
+  - name: busybox
+    image: busybox
+    command:
+    - "sleep" 
+    - "3600" 
+
